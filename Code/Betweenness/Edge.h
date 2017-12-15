@@ -18,8 +18,7 @@ public:
 	double GetWeight();
 	void SetWeight(double weight);
 	int GetId();
-	void SetId(int id);
 
-	Edge(int input, int output, double length);
+	Edge(int id, int input, int output, double length);
 	~Edge();
 };

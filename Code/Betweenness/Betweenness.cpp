@@ -82,7 +82,7 @@ BetweennessResult Betweenness::Calculate(int startVertex, int endVertex)
 						{
 							//sp[w] = sp[w] + edgeDistance*sp[v];
 							sp[w] = sp[w] + sp[v];
-							Pred[w].push_back(v);
+							Pred[w].push_back(adjEdge.GetId());//if stores edge ids instead of predecessors vertices, so multiplicity will be possible
 						}
 					}
 				}
@@ -103,12 +103,12 @@ BetweennessResult Betweenness::Calculate(int startVertex, int endVertex)
 				int w = S.top();
 				S.pop();
 
-				for (auto v : Pred[w])
+				for (auto edgeId : Pred[w])//go through edges on shortest paths, so we would know to which edge we should add edge betweenness value and to identify source vertex
 				{
-					c = (sp[v] / sp[w] * (1 + delta[w]));
-					//save edge betweenness
-					int edgeId = graph->GetEdgeId(v, w);
-					edgeBetweenness[edgeId] = edgeBetweenness[edgeId] + c;
+					int v = graph->GetEdge(edgeId)->GetInput();//predecessor of w on shortest path from s
+					c = (sp[v] / sp[w] * (1 + delta[w]));//extention about source vertex importance and destination vertex importance
+
+					edgeBetweenness[edgeId] = edgeBetweenness[edgeId] + c;	//save edge betweenness
 					delta[v] = delta[v] + c;
 				}
 				if (w != s)

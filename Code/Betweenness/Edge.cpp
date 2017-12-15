@@ -35,13 +35,9 @@ int Edge::GetId()
 	return id;
 }
 
-void Edge::SetId(int id)
+Edge::Edge(int id, int input, int output, double length)
 {
 	this->id = id;
-}
-
-Edge::Edge(int input, int output, double length)
-{
 	this->input = input;
 	this->output = output;
 	this->length = length;

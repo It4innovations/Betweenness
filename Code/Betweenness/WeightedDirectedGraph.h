@@ -16,6 +16,9 @@
 #include <iostream>
 #include <sstream>
 
+#include "CsvReader.h"
+#include <map>
+
 class WeightedDirectedGraph
 {
 private:
@@ -30,19 +33,20 @@ private:
 	};
 
 	vector<Edge> *adj;
+	map<int, Edge*> edges;
+
 	int vertices;
-	int edges;
-	int edgeIdCounter;
-	unordered_map<pair<int, int>, int, PairHash> verticesToEdgeMap;
-	pair<int, int> myPair;
+	int edgeCount;
+
+	void AddEdge(Edge & edge);
 public:
 	WeightedDirectedGraph(int vertices);
 
 	int GetVertices();
+	Edge * GetEdge(int id);
 	int GetEdges();
-	int GetEdgeId(int input, int output);
-	void AddEdge(Edge & edge);
-	void AddEdge(int input, int output, double weight);
+
+	void AddEdge(int id, int input, int output, double length);
 
 	//Returns list of edges for a given vertex
 	vector<Edge> & GetAdjacentVertices(int vertex);
@@ -50,9 +54,6 @@ public:
 	//Normalizes weights of edges in graph to <0,1> and returns denormalizeValue
 	double NormalizeWeights();
 	void DenormalizeWeights(double denormalizeValue);
-
-	//This method returns subgraph with vertices around centerVertex that are accessible in path of distance length
-	WeightedDirectedGraph * GetSubGraph(int centerVertex, double distance);
 
 	~WeightedDirectedGraph();
 };

@@ -6,7 +6,7 @@ Utils::Utils()
 
 bool Utils::AreEqual(double a, double b)
 {
-	double EPSILON = 0.00001f;
+	double EPSILON = 0.00000001;
 	return fabs(a - b) < EPSILON;
 }
 

@@ -3,7 +3,7 @@ This repository contains C++ implementation of Betweenness algorithm according t
 
 ## Compile instructions
 ```
-module load intel/2017.00 Mono/4.2.2.10-intel-2016.01 CMake/3.5.2-intel-2017.00
+module load intel/2017.00 CMake/3.5.2-intel-2017.00
 cd Code
 mkdir build && cd build
 cmake ..
@@ -11,37 +11,16 @@ make
 ```
 ## Use instructions
 
-1. Unzip experiment_graphs.zip and put files to Graphs/OpenStreetMaps folder
+1. Unzip experiment_graphs.zip
 ```
-unzip Graphs/experiment_graphs.zip -d Graphs/OpenStreetMaps/
-```
-
-2. Use graph manipulator utility to generate inputs for betweenness algorithm
-```
-module load Mono/4.2.2.10-intel-2016.01
-mono Code/build/BetweennessGraphManipulator.exe -f ../../Graphs -o 1
+unzip Graphs/experiment_graphs.zip -d Graphs/
 ```
 
-3. Run betweenness centrality algorithm on generated data and move edge BC outputs to Graphs/BetweennessOutputs folder, vertex BC output can be deleted(is not used for visualization)
+2. Run betweenness centrality algorithm
 ```
-module purge
-module load intel/2017.00
 cd Code/build/
-./betweenness -f ../../Graphs/BetweennessInputs/graph-cze-brno_preprocessed.csv
-cd ../../Graphs/BetweennessInputs/
-mv graph-cze-brno_preprocessed.csv_result_edge_betweenness.csv ../BetweennessOutputs/
-rm graph-cze-brno_preprocessed.csv_result_vertex_betweenness.csv
+./betweenness -f ../../Graphs/graph-cze-brno.csv
 ```
-
-4. Put just edge results from BC algorithm to Graphs/BetweennessOutputs folder and run utility again, but now for generating inputs for visualization
-```
-module purge
-module load Mono/4.2.2.10-intel-2016.01
-cd Code/build/
-mono BetweennessGraphManipulator.exe -f ../../Graphs -o 2
-```
-
-5. Use generated files for visualization from Graphs/VisualizationInputs folder
 
 ## Experiments
 
@@ -49,8 +28,8 @@ mono BetweennessGraphManipulator.exe -f ../../Graphs -o 2
 ```
 qsub -q qexp -l select=1 -I
 module load intel/2017.00
-cd Code/Betweenness/
-./betweenness.exe -f ../../Graphs/BetweennessInputs/graph-cze-brno_preprocessed.csv
+cd Code/build/
+./betweenness -f ../../Graphs/graph-cze-brno.csv
 ```
 
 File | Vertices | Time[s]
@@ -73,6 +52,7 @@ graph-cze-praha_preprocessed.csv   | 160613 | 8.65
 graph-prt_preprocessed.csv         | 942609 | 3694
 graph-prt-lisbon_preprocessed.csv  | 61513  | 0.88
 graph-prt-port_preprocessed.csv    | 112679 | 1.36
+
 
 # LICENSE
 This implementation of the Betweenness algorithm is licensed under the **GNU Lesser General Public License (LGPL)**. Full text of the LGPL can be found at [https://www.gnu.org/licenses/lgpl-3.0-standalone.html](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) or [here](../LICENSE.LGPL.md).
