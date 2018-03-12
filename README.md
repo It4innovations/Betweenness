@@ -1,5 +1,3 @@
-# Betweenness
-
 # Betweenness centrality Code Repository
 This repository contains C++ implementation of Betweenness algorithm according to *U. Brandes: On Variants of Shortest-Path Betweenness Centrality and their Generic Computation (2008)*.
 
