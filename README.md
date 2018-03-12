@@ -34,24 +34,24 @@ cd Code/build/
 
 File | Vertices | Time[s]
 ------------- |-------------|-------------
-graph-cze-brno_preprocessed.csv    | 55492  | 103.9
-graph-cze-ostrava_preprocessed.csv | 45404  | 73.5
-graph-cze-praha_preprocessed.csv   | 160613 | 956.9
-graph-prt-lisbon_preprocessed.csv  | 61513  | 93.3
-graph-prt-port_preprocessed.csv    | 112679 | 80.5
+graph-cze-brno.csv    | 55492  | 103.9
+graph-cze-ostrava.csv | 45404  | 73.5
+graph-cze-praha.csv   | 160613 | 956.9
+graph-prt-lisbon.csv  | 61513  | 93.3
+graph-prt-port.csv    | 112679 | 80.5
 
 
 2. Our parallel version on 10 nodes = 240 processes and 1 thread per process
 
 File | Vertices | Time[s]
 ------------- |-------------|-------------
-graph-cze_preprocessed.csv         | 969389 | 3599
-graph-cze-brno_preprocessed.csv    | 55492  | 0.99
-graph-cze-ostrava_preprocessed.csv | 45404  | 0.68
-graph-cze-praha_preprocessed.csv   | 160613 | 8.65
-graph-prt_preprocessed.csv         | 942609 | 3694
-graph-prt-lisbon_preprocessed.csv  | 61513  | 0.88
-graph-prt-port_preprocessed.csv    | 112679 | 1.36
+graph-cze.csv         | 969389 | 3599
+graph-cze-brno.csv    | 55492  | 0.99
+graph-cze-ostrava.csv | 45404  | 0.68
+graph-cze-praha.csv   | 160613 | 8.65
+graph-prt.csv         | 942609 | 3694
+graph-prt-lisbon.csv  | 61513  | 0.88
+graph-prt-port.csv    | 112679 | 1.36
 
 
 # LICENSE
