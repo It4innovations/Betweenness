@@ -82,13 +82,13 @@ int main(int argc, char* argv[])
 
 	auto end_time = chrono::high_resolution_clock::now();
 	auto time = end_time - start_time;
+	cout << "Input graph contained: " << graph->GetVertices() << " vertices and " << graph->GetEdges() << " edges." << endl;
 	cout << "Betweenness took " <<
 		chrono::duration_cast<chrono::milliseconds>(time).count() << " ms to run.\n";
 
 	double *betweenness = result.VertexBetweenness;
 	double *edgeBetweenness = result.EdgeBetweenness;
 	WriteResult(betweenness, edgeBetweenness, graph, file, verticesNewToOld, edgesNewToOld);
-	cout << "Results written ..." << endl;
 
 	delete[] betweenness;
 	delete[] edgeBetweenness;

@@ -8,7 +8,6 @@ Betweenness::Betweenness(WeightedDirectedGraph &graph)
 
 BetweennessResult Betweenness::Calculate(int startVertex, int endVertex)
 {
-	cout << "start " << startVertex << ", end " << endVertex << endl;
 	int vertices = graph->GetVertices();
 	int edges = graph->GetEdges();
 	double *betweenness = new double[vertices];
@@ -29,16 +28,17 @@ BetweennessResult Betweenness::Calculate(int startVertex, int endVertex)
 	double *sp = new double[vertices];
 	double *delta = new double[vertices];
 	bool *isInStack = new bool[vertices];
-
+	Pred = new list<int>[vertices];
+	
 	for (int s = startVertex; s < endVertex; s++)
 	{
 		//Single source shortest-paths problem
 		{
 			//Initialization
 			{
-				Pred = new list<int>[vertices];
 				for (int i = 0; i < vertices; i++)
 				{
+					Pred[i].clear();
 					dist[i] = DBL_MAX;
 					sp[i] = 0;
 					isInStack[i] = false;
@@ -117,10 +117,9 @@ BetweennessResult Betweenness::Calculate(int startVertex, int endVertex)
 				}
 			}
 		}
-
-		delete[] Pred;
 	}
 
+	delete[] Pred;
 	delete[] dist;
 	delete[] sp;
 	delete[] delta;
