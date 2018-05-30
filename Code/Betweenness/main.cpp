@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
 	Betweenness *bb = new Betweenness(*graph);
 	auto start_time = chrono::high_resolution_clock::now();
 
+	cout << "Betweenness started " << endl;
 	BetweennessResult result = bb->Calculate(startVertex, endVertex);
 
 	auto end_time = chrono::high_resolution_clock::now();
@@ -166,7 +167,7 @@ WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNe
 		iss >> reader;
 		int v = stoi(reader[0]);
 		int w = stoi(reader[1]);
-		int weight = stoi(reader[2]);
+		int weight = stod(reader[2]);
 		int edgeId = stoi(reader[3]);
 
 		int newV, newW;
