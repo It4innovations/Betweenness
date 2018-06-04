@@ -32,13 +32,13 @@ cd Code/build/
 ./betweenness -f ../../Graphs/graph-cze-brno.csv
 ```
 
-File | Vertices | Time[s]
-------------- |-------------|-------------
-graph-cze-brno.csv    | 55492  | 103.9
-graph-cze-ostrava.csv | 45404  | 73.5
-graph-cze-praha.csv   | 160613 | 956.9
-graph-prt-lisbon.csv  | 61513  | 93.3
-graph-prt-port.csv    | 112679 | 80.5
+File | Vertices | Edges | Time[s]
+------------- |-------------|-------------|-------------
+graph-cze-brno.csv    | 16901  | 36349  | 112.36
+graph-cze-ostrava.csv | 14140  | 31494  | 78.13
+graph-cze-praha.csv   | 48254  | 104033 | 1160.23
+graph-prt-lisbon.csv  | 15381  | 30732  | 91.91
+graph-prt-port.csv    | 7316   | 14793  | 17.70
 
 
 2. Our parallel version on 10 nodes = 240 processes and 1 thread per process
