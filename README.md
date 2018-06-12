@@ -16,15 +16,18 @@ make
 unzip Graphs/experiment_graphs.zip -d Graphs/
 ```
 
+
 2. Run betweenness centrality algorithm
 ```
 cd Code/build/
 ./betweenness -f ../../Graphs/graph-cze-brno.csv
 ```
 
+
 ## Experiments
 
 1. Sequential version on one node
+
 ```
 qsub -q qexp -l select=1 -I
 module load intel/2017.00
