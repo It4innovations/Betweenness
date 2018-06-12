@@ -40,20 +40,6 @@ graph-cze-praha.csv   | 48254  | 104033 | 1160.23
 graph-prt-lisbon.csv  | 15381  | 30732  | 91.91
 graph-prt-port.csv    | 7316   | 14793  | 17.70
 
-
-2. Our parallel version on 10 nodes = 240 processes and 1 thread per process
-
-File | Vertices | Time[s]
-------------- |-------------|-------------
-graph-cze.csv         | 969389 | 3599
-graph-cze-brno.csv    | 55492  | 0.99
-graph-cze-ostrava.csv | 45404  | 0.68
-graph-cze-praha.csv   | 160613 | 8.65
-graph-prt.csv         | 942609 | 3694
-graph-prt-lisbon.csv  | 61513  | 0.88
-graph-prt-port.csv    | 112679 | 1.36
-
-
 # LICENSE
 This implementation of the Betweenness algorithm is licensed under the **GNU Lesser General Public License (LGPL)**. Full text of the LGPL can be found at [https://www.gnu.org/licenses/lgpl-3.0-standalone.html](https://www.gnu.org/licenses/lgpl-3.0-standalone.html) or [here](../LICENSE.LGPL.md).
 
