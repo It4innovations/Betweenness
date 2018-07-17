@@ -19,7 +19,7 @@
 void PrintUsage();
 void WriteResult(double * bw, double * ebw, WeightedDirectedGraph * graph, string filename, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld);
 WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld);
-
+void PrintParameters(string file, int startVertex, int endVertex);
 
 int main(int argc, char* argv[])
 {
@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
 	Betweenness *bb = new Betweenness(*graph);
 	auto start_time = chrono::high_resolution_clock::now();
 
+	PrintParameters(file, startVertex, endVertex);
 	cout << "Betweenness started " << endl;
 	BetweennessResult result = bb->Calculate(startVertex, endVertex);
 
@@ -101,6 +102,15 @@ int main(int argc, char* argv[])
 	delete bb;
 
 	return 0;
+}
+
+void PrintParameters(string file, int startVertex, int endVertex)
+{
+	cout << "Betweenness parameters:" << endl;
+	cout << "-file: " << file << endl;
+	cout << "-startVertex: " << startVertex << endl;
+	cout << "-endVertex: " << endVertex << endl;
+	cout << endl;
 }
 
 void PrintUsage()
