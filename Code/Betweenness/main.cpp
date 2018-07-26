@@ -177,7 +177,7 @@ WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNe
 		iss >> reader;
 		int v = stoi(reader[0]);
 		int w = stoi(reader[1]);
-		int weight = stod(reader[2]);
+		double weight = stod(reader[2]);
 		int edgeId = stoi(reader[3]);
 
 		int newV, newW;
