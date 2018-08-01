@@ -20,12 +20,12 @@ void Edge::SetOutput(int output)
 	this->output = output;
 }
 
-double Edge::GetWeight()
+btw_num_t Edge::GetWeight()
 {
 	return length;
 }
 
-void Edge::SetWeight(double length)
+void Edge::SetWeight(btw_num_t length)
 {
 	this->length = length;
 }
@@ -35,7 +35,7 @@ int Edge::GetId()
 	return id;
 }
 
-Edge::Edge(int id, int input, int output, double length)
+Edge::Edge(int id, int input, int output, btw_num_t length)
 {
 	this->id = id;
 	this->input = input;

@@ -4,15 +4,15 @@ Utils::Utils()
 {
 }
 
-bool Utils::AreEqual(double a, double b)
+bool Utils::AreEqual(btw_num_t a, btw_num_t b)
 {
-	double EPSILON = 0.00000001;
+	btw_num_t EPSILON = 0.00000001;
 	return fabs(a - b) < EPSILON;
 }
 
-double Utils::RandBetween(double minIncluseive, double maxInclusive) {
-	double val = rand() / RAND_MAX;
-	double range = maxInclusive - minIncluseive;	//with +1 to max => exclusive, but take care of overflow
+btw_num_t Utils::RandBetween(btw_num_t minIncluseive, btw_num_t maxInclusive) {
+	btw_num_t val = rand() / RAND_MAX;
+	btw_num_t range = maxInclusive - minIncluseive;	//with +1 to max => exclusive, but take care of overflow
 	return (val * range) + minIncluseive;
 }
 

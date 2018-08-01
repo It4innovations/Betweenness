@@ -1,4 +1,5 @@
 #pragma once
+#include "Types.h"
 #include <iostream>
 
 using namespace std;
@@ -8,17 +9,17 @@ class Edge
 private:
 	int input;
 	int output;
-	double length;
+	btw_num_t length;
 	int id;
 public:
 	int GetInput();
 	int GetOutput();
 	void SetInput(int input);
 	void SetOutput(int output);
-	double GetWeight();
-	void SetWeight(double weight);
+	btw_num_t GetWeight();
+	void SetWeight(btw_num_t weight);
 	int GetId();
 
-	Edge(int id, int input, int output, double length);
+	Edge(int id, int input, int output, btw_num_t length);
 	~Edge();
 };

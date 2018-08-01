@@ -1,9 +1,8 @@
-module load intel/2017.00
-module load CMake/3.5.2-intel-2017.00
+#!/bin/bash
 
-cd Code
-rm -r build
-mkdir build
-cd build
+ml intel/2018.03 CMake
+
+mkdir Code/build
+cd Code/build || exit 1
 cmake ..
-make
+make -j 24 VERBOSE=1

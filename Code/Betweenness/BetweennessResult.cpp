@@ -4,7 +4,7 @@ BetweennessResult::BetweennessResult()
 {
 }
 
-BetweennessResult::BetweennessResult(double * vertexBetweenness, double * edgeBetweenness)
+BetweennessResult::BetweennessResult(btw_num_t * vertexBetweenness, btw_num_t * edgeBetweenness)
 {
 	this->VertexBetweenness = vertexBetweenness;
 	this->EdgeBetweenness = edgeBetweenness;

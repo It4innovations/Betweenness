@@ -6,9 +6,11 @@
 #include "KeyValuePair.h"
 #include "WeightedDirectedGraph.h"
 #include "Betweenness.h"
+#include "Types.h"
 #include <chrono>
 #include <cfloat>
 #include <cstring>
+#include <mpi.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -17,13 +19,21 @@
 #include <string>
 
 void PrintUsage();
-void WriteResult(double * bw, double * ebw, WeightedDirectedGraph * graph, string filename, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld);
-WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld);
-void PrintParameters(string file, int startVertex, int endVertex);
+void WriteResult(btw_num_t * bw, btw_num_t * ebw, WeightedDirectedGraph * graph, string filename, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld);
+WeightedDirectedGraph * ReadGraph(string fileName, string alphaFileName, string betaFileName, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld);
+btw_num_t * ReadImportance(string fileName, int vertices, std::map<int, int> * vertexOldToNewMap);
+void PrintParameters(int version, string file, int startVertex, int endVertex, int chunkSize, int threads, int processes, string alphaFile, string betaFile);
 
 int main(int argc, char* argv[])
 {
+	MPI_Init(&argc, &argv);
+
 	string file = "graph.csv";
+	string alphaFile = "";
+	string betaFile = "";
+	int threads = 1;	//omp_get_max_threads();
+	int version = 0;	//0=serial, 1=openmp, other=mpi
+	int chunkSize = 100;
 	int startVertex = 0;
 	int endVertex = 0;
 
@@ -43,7 +53,11 @@ int main(int argc, char* argv[])
 				exit(0);
 			}
 
-			if (argument == "-f")//file path with graph
+			if (argument == "-v")//version
+			{
+				version = atoi(argv[i + 1]);
+			}
+			else if (argument == "-f")//file path with graph
 			{
 				file = argv[i + 1];
 			}
@@ -55,15 +69,37 @@ int main(int argc, char* argv[])
 			{
 				endVertex = atoi(argv[i + 1]);
 			}
+			else if (argument == "-ch")//chunk size
+			{
+				chunkSize = atoi(argv[i + 1]);
+			}
+			else if (argument == "-t")//number of used threads
+			{
+				threads = atoi(argv[i + 1]);
+			}
+			else if (argument == "-a")//file with alpha values
+			{
+				alphaFile = argv[i + 1];
+			}
+			else if (argument == "-b")//file with beta values
+			{
+				betaFile = argv[i + 1];
+			}
 			i++;
 		}
 	}
 
+	int rank;
+	int size;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
 	std::vector<int> * verticesNewToOld = new std::vector<int>();
 	std::vector<int> * edgesNewToOld = new std::vector<int>();
-
-	WeightedDirectedGraph *graph = ReadGraph(file, verticesNewToOld, edgesNewToOld);//if alpha and beta string is "" then default alpha and beta values are used (1, 1, ...)
+	
+	WeightedDirectedGraph *graph = ReadGraph(file, alphaFile, betaFile, verticesNewToOld, edgesNewToOld);//if alpha and beta string is "" then default alpha and beta values are used (1, 1, ...)
 	graph->NormalizeWeights();
+
 
 	if (startVertex < 0 || startVertex > graph->GetVertices())
 	{
@@ -78,22 +114,45 @@ int main(int argc, char* argv[])
 	Betweenness *bb = new Betweenness(*graph);
 	auto start_time = chrono::high_resolution_clock::now();
 
-	PrintParameters(file, startVertex, endVertex);
-	cout << "Betweenness started " << endl;
-	BetweennessResult result = bb->Calculate(startVertex, endVertex);
+	BetweennessResult result;
+	if(rank == 0) PrintParameters(version, file, startVertex, endVertex, chunkSize, threads, size, alphaFile, betaFile);
+	
+	if (version == 0)
+	{
+		cout << "Betweenness started " << endl;
+		result = bb->Calculate(startVertex, endVertex);
+	}
+	else if (version == 1)
+	{
+		cout << "Betweenness started " << endl;
+		result = bb->CalculateOpenMP(startVertex, endVertex, threads);
+	}
+	else
+	{
+		if (rank == 0) cout << "Betweenness started " << endl;
+		result = bb->CalculateMpi(startVertex, endVertex, threads, chunkSize);
+	}
 
-	auto end_time = chrono::high_resolution_clock::now();
-	auto time = end_time - start_time;
-	cout << "Input graph contained: " << graph->GetVertices() << " vertices and " << graph->GetEdges() << " edges." << endl;
-	cout << "Betweenness took " <<
-		chrono::duration_cast<chrono::milliseconds>(time).count() << " ms to run.\n";
+	if (version == 0 
+		|| version == 1 
+		|| rank == 0)
+	{
+		auto end_time = chrono::high_resolution_clock::now();
+		auto time = end_time - start_time;
+		cout << "Input graph contained: " << graph->GetVertices() << " vertices and " << graph->GetEdges() << " edges." << endl;
+		cout << "Betweenness took " <<
+			chrono::duration_cast<chrono::milliseconds>(time).count() << " ms to run.\n";
+	}
 
-	double *betweenness = result.VertexBetweenness;
-	double *edgeBetweenness = result.EdgeBetweenness;
-	WriteResult(betweenness, edgeBetweenness, graph, file, verticesNewToOld, edgesNewToOld);
+	if (rank == 0)
+	{
+		btw_num_t *betweenness = result.VertexBetweenness;
+		btw_num_t *edgeBetweenness = result.EdgeBetweenness;
+		WriteResult(betweenness, edgeBetweenness, graph, file, verticesNewToOld, edgesNewToOld);
 
-	delete[] betweenness;
-	delete[] edgeBetweenness;
+		delete[] betweenness;
+		delete[] edgeBetweenness;
+	}
 
 	delete verticesNewToOld;
 	delete edgesNewToOld;
@@ -101,34 +160,61 @@ int main(int argc, char* argv[])
 	delete graph;
 	delete bb;
 
+	MPI_Finalize();
 	return 0;
 }
 
-void PrintParameters(string file, int startVertex, int endVertex)
+void PrintParameters(int version, string file, int startVertex, int endVertex, int chunkSize, int threads, int processes, string alphaFile, string betaFile)
 {
 	cout << "Betweenness parameters:" << endl;
+	cout << "-version: " << version << endl;
 	cout << "-file: " << file << endl;
 	cout << "-startVertex: " << startVertex << endl;
 	cout << "-endVertex: " << endVertex << endl;
+	if(version == 1 || version == 2) cout << "-threads: " << threads << endl;
+	if(version == 2) cout << "-chunkSize: " << chunkSize << endl << "-processes: " << processes << endl;
+	cout << "-alphaFile: " << alphaFile << endl;
+	cout << "-betaFile: " << betaFile << endl;
 	cout << endl;
+
+	std::cout << "Floating point: ";
+	#ifdef NUM_SINGLE
+		std::cout << "SINGLE" << std::endl;
+	#elif NUM_DOUBLE
+		std::cout << "DOUBLE" << std::endl;
+	#endif
+
+		std::cout << "Node and vertex importance: ";
+	#ifdef BTW_USE_EXTENSION
+		std::cout << "YES" << std::endl;
+   	#else
+		std::cout << "NO" << std::endl;
+	#endif
 }
 
 void PrintUsage()
 {
 	cout << endl;
 	cout << "Help for betweenness algorithm parameters" << endl;
-	cout << "Usage: ./betweenness.exe -f <file> -s <start> -e <end>" << endl;
+	cout << "Usage: ./betweenness.exe -f <file> -v <version> -w <weight> -s <start> -e <end> -ch <chunk> -t <threads> -a <alphas> -b <betas>" << endl;
+	cout << "Usage: mpirun -n 24 ./betweenness.exe -f <file> -v <version> -w <weight> -s <start> -e <end> -ch <chunk> -t <threads> -a <alphas> -b <betas>" << endl;
 
 	cout << "Where:" << endl;
 	cout << " <file>: \tFile with graph in .csv format" << endl;
+	cout << " <version>: \t0 is serial[default], 1 is OpenMP version, 2 is MPI" << endl;
 	cout << " <start>: \tFrom which vertex id calculate betweenness [default=0]" << endl;
 	cout << " <end>: \tTo which vertex id calculate [default=last vertex of graph]" << endl;
+	cout << " <chunk>: \tSize of work for mpi slave processes (number of vertices)" << endl;
+	cout << " <threads>: \tUsed threads by parallel version or each slave process" << endl;
+	cout << " <alphas>: \tFile with alpha values for node importance" << endl;
+	cout << " <betas>: \tFile with beta values for node importance" << endl;
 	cout << endl;
+
 }
 
-void WriteResult(double * bw, double * ebw, WeightedDirectedGraph * graph, string filename, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld)
+void WriteResult(btw_num_t * bw, btw_num_t * ebw, WeightedDirectedGraph * graph, string filename, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld)
 {
-	ofstream file(filename + "_result_edge_betweenness.csv");
+	ofstream file("result_edge_betweenness.csv");
 
 	file << "ID;VALUE" << endl;
 	file.setf(ios::fixed);
@@ -142,7 +228,7 @@ void WriteResult(double * bw, double * ebw, WeightedDirectedGraph * graph, strin
 
 	file.close();
 
-	ofstream file2(filename + "_result_vertex_betweenness.csv");
+	ofstream file2("result_vertex_betweenness.csv");
 	file2 << "ID;VALUE" << endl;
 	file2.setf(ios::fixed);
 	file2.precision(4);
@@ -156,7 +242,7 @@ void WriteResult(double * bw, double * ebw, WeightedDirectedGraph * graph, strin
 	file2.close();
 }
 
-WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld)
+WeightedDirectedGraph * ReadGraph(string fileName, string alphaFileName, string betaFileName, std::vector<int> * verticesNewToOld, std::vector<int> * edgesNewToOld)
 {
 	//first line is head id1;id2;dist;edge_id
 	//other lines are edges 35373027;35405905;101;42060111
@@ -177,7 +263,7 @@ WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNe
 		iss >> reader;
 		int v = stoi(reader[0]);
 		int w = stoi(reader[1]);
-		double weight = stod(reader[2]);
+		int weight = stod(reader[2]);
 		int edgeId = stoi(reader[3]);
 
 		int newV, newW;
@@ -219,12 +305,62 @@ WeightedDirectedGraph * ReadGraph(string fileName, std::vector<int> * verticesNe
 
 	int vertices = vertexOldToNewMap->size();
 	WeightedDirectedGraph *graph = new WeightedDirectedGraph(vertices);
-
+	
 	for (size_t i = 0; i < edges.size(); i++)
 	{
 		graph->AddEdge(edges[i].GetId(), edges[i].GetInput(), edges[i].GetOutput(), edges[i].GetWeight());//remaping indexes of edges
 	}
 
+	//SET VERTEX IMPORTANCE
+	btw_num_t * alpha = ReadImportance(alphaFileName, vertices, vertexOldToNewMap);
+	btw_num_t * beta = ReadImportance(betaFileName, vertices, vertexOldToNewMap);
+	btw_num_t * graphAlpha = graph->GetAlpha();
+	btw_num_t * graphBeta = graph->GetBeta();
+
+	for (size_t i = 0; i < vertices; i++)
+	{
+		graphAlpha[i] = alpha[i];
+		graphBeta[i] = beta[i];
+	}
+
+	delete[] alpha;
+	delete[] beta;
 	delete vertexOldToNewMap;
+
 	return graph;
+}
+
+btw_num_t * ReadImportance(string fileName, int vertices, std::map<int, int> * vertexOldToNewMap)
+{
+	btw_num_t *importance = new btw_num_t[vertices];
+	for (size_t i = 0; i < vertices; i++)
+	{
+		importance[i] = 1;
+	}
+
+	if (fileName != "")
+	{
+		CsvReader reader(';');
+
+		ifstream file(fileName);
+		string line;
+		getline(file, line);//first line is header
+
+		int i = 0;
+		while (getline(file, line))
+		{
+			int key;
+			istringstream stream(line);
+
+			stream >> reader;
+			key = stoi(reader[0]);
+			int newId = (*vertexOldToNewMap)[key];
+			importance[newId] = stod(reader[1]);
+
+			i++;
+		}
+		file.close();
+	}
+
+	return importance;
 }

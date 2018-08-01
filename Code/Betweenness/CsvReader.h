@@ -1,4 +1,5 @@
 #pragma once
+#include "Types.h"
 #include <iterator>
 #include <iostream>
 #include <fstream>

@@ -1,11 +1,13 @@
 #pragma once
+#include "Types.h"
+
 class BetweennessResult
 {
 public:
-	double * VertexBetweenness;
-	double * EdgeBetweenness;
+	btw_num_t * VertexBetweenness;
+	btw_num_t * EdgeBetweenness;
 	BetweennessResult();
-	BetweennessResult(double * vertexBetweenness, double * edgeBetweenness);
+	BetweennessResult(btw_num_t * vertexBetweenness, btw_num_t * edgeBetweenness);
 	~BetweennessResult();
 };
 

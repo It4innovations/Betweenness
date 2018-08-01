@@ -1,11 +1,13 @@
 #pragma once
+#include "Types.h"
+
 class KeyValuePair
 {
 public:
-	double Key;
+	btw_num_t Key;
 	int Value;
 
-	KeyValuePair(double key, int value);
+	KeyValuePair(btw_num_t key, int value);
 	friend bool operator >(const KeyValuePair& lhs, const KeyValuePair& rhs);
 	~KeyValuePair();
 };

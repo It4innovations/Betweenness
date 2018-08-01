@@ -5,6 +5,14 @@ WeightedDirectedGraph::WeightedDirectedGraph(int vertices)
 	this->vertices = vertices;
 	adj = new vector<Edge>[vertices];	//array of vectors of adj vertices to vertex represented by index
 	edgeCount = -1;
+	alpha = new btw_num_t[vertices];
+	beta = new btw_num_t[vertices];
+
+	for (size_t i = 0; i < vertices; i++)
+	{
+		alpha[i] = 1;
+		beta[i] = 1;
+	}
 }
 
 int WeightedDirectedGraph::GetVertices()
@@ -37,7 +45,7 @@ void WeightedDirectedGraph::AddEdge(Edge & edge)
 	edges[edge.GetId()] = new Edge(edge.GetId(), edge.GetInput(), edge.GetOutput(), edge.GetWeight());//insert edge also to map of edges, for fast access by id
 }
 
-void WeightedDirectedGraph::AddEdge(int id, int input, int output, double length)
+void WeightedDirectedGraph::AddEdge(int id, int input, int output, btw_num_t length)
 {
 	Edge edge(id, input, output, length);
 	AddEdge(edge);
@@ -48,9 +56,9 @@ vector<Edge> & WeightedDirectedGraph::GetAdjacentVertices(int vertex)
 	return adj[vertex];
 }
 
-double WeightedDirectedGraph::NormalizeWeights()
+btw_num_t WeightedDirectedGraph::NormalizeWeights()
 {
-	double maxWeight = 0;
+	btw_num_t maxWeight = 0;
 	for (size_t i = 0; i < vertices; i++)
 	{
 		for (auto &adjEdge : adj[i])
@@ -73,9 +81,9 @@ double WeightedDirectedGraph::NormalizeWeights()
 	return maxWeight;
 }
 
-void WeightedDirectedGraph::DenormalizeWeights(double denormalizeValue)
+void WeightedDirectedGraph::DenormalizeWeights(btw_num_t denormalizeValue)
 {
-	double maxWeight = denormalizeValue;
+	btw_num_t maxWeight = denormalizeValue;
 
 	for (size_t i = 0; i < vertices; i++)
 	{
@@ -91,9 +99,21 @@ void WeightedDirectedGraph::DenormalizeWeights(double denormalizeValue)
 	}
 }
 
-WeightedDirectedGraph::~WeightedDirectedGraph()
+btw_num_t * WeightedDirectedGraph::GetAlpha()
 {
+	return alpha;
+}
+
+btw_num_t * WeightedDirectedGraph::GetBeta()
+{
+	return beta;
+}
+
+WeightedDirectedGraph::~WeightedDirectedGraph()
+{	
 	delete[] adj;	//delete array of vectors
+	delete[] alpha;
+	delete[] beta;
 
 	for (auto val : edges)
 	{

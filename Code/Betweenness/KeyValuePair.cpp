@@ -1,6 +1,6 @@
 #include "KeyValuePair.h"
 
-KeyValuePair::KeyValuePair(double key, int value)
+KeyValuePair::KeyValuePair(btw_num_t key, int value)
 {
 	this->Key = key;
 	this->Value = value;
