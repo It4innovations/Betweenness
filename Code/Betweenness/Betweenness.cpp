@@ -1,6 +1,31 @@
 #include "Betweenness.h"
 
 
+int * Betweenness::GetRangesOfWork(int count, int n)
+{
+	//first use rangesOfWork array to get counts of work for count=6 and n=4 => [2,2,1,1]
+	int *rangesOfWork = new int[n + 1]; 
+	int minWork = count / n;
+	for (size_t i = 1; i < n + 1; i++)
+	{
+		rangesOfWork[i] = minWork;
+	}
+
+	int remaining = count - n * minWork;
+	for (size_t i = 1; i < remaining + 1; i++)
+	{
+		rangesOfWork[i] += 1;
+	}
+
+	rangesOfWork[0] = 0;	//transform array of counts to ranges of work [0,2,4,5,6]
+	for (size_t i = 1; i < n + 1; i++)
+	{
+		rangesOfWork[i] += rangesOfWork[i - 1];
+	}
+	
+	return rangesOfWork;
+}
+
 Betweenness::Betweenness(WeightedDirectedGraph &graph)
 {
 	this->graph = &graph;
@@ -153,38 +178,38 @@ BetweennessResult Betweenness::CalculateOpenMP(int startVertex, int endVertex, i
 		omp_init_lock(&lockArray[i + vertices]);
 	}
 
+	int count = endVertex - startVertex;
+	int *rangesOfWork = GetRangesOfWork(count, threads);
+	
 #pragma omp parallel shared(betweenness, lockArray) num_threads(threads)
 	{
-		int vert = endVertex - startVertex;
 		int tid = omp_get_thread_num();
-
-		int size = (int)ceill((btw_num_t)vert / threads);
-		int start = tid * size;
-		int end = start + size;
-		if (tid == threads - 1)
+		int start = startVertex + rangesOfWork[tid];
+		int end = startVertex + rangesOfWork[tid + 1];
+		
+		if (start < end)
 		{
-			end = vert;
-		}
-		//for low number of vertices if start is higher than max vertex id then this method will not modify betweenness
-		BetweennessResult result = Calculate(startVertex + start, startVertex + end);
-		btw_num_t *subBetweenness = result.VertexBetweenness;
-		btw_num_t *subEdgeBetweenness = result.EdgeBetweenness;
+			//for low number of vertices if start is higher than max vertex id then this method will not modify betweenness
+			BetweennessResult result = Calculate(start, end);
+			btw_num_t *subBetweenness = result.VertexBetweenness;
+			btw_num_t *subEdgeBetweenness = result.EdgeBetweenness;
 
-		for (size_t i = 0; i < vertices; i++) {
-			omp_set_lock(&lockArray[i]);
-			betweenness[i] = betweenness[i] + subBetweenness[i];
-			omp_unset_lock(&lockArray[i]);
-		}
+			for (size_t i = 0; i < vertices; i++) {
+				omp_set_lock(&lockArray[i]);
+				betweenness[i] = betweenness[i] + subBetweenness[i];
+				omp_unset_lock(&lockArray[i]);
+			}
 
-		for (size_t i = 0; i < edges; i++)
-		{
-			omp_set_lock(&lockArray[i + vertices]);
-			edgeBetweenness[i] = edgeBetweenness[i] + subEdgeBetweenness[i];
-			omp_unset_lock(&lockArray[i + vertices]);
-		}
+			for (size_t i = 0; i < edges; i++)
+			{
+				omp_set_lock(&lockArray[i + vertices]);
+				edgeBetweenness[i] = edgeBetweenness[i] + subEdgeBetweenness[i];
+				omp_unset_lock(&lockArray[i + vertices]);
+			}
 
-		delete[] subBetweenness;
-		delete[] subEdgeBetweenness;
+			delete[] subBetweenness;
+			delete[] subEdgeBetweenness;
+		}
 	}
 
 	for (size_t i = 0; i < vertices + edges; i++)
@@ -192,6 +217,7 @@ BetweennessResult Betweenness::CalculateOpenMP(int startVertex, int endVertex, i
 		omp_destroy_lock(&lockArray[i]);
 	}
 	delete[] lockArray;
+	delete[] rangesOfWork;
 
 	return BetweennessResult(betweenness, edgeBetweenness);
 }

@@ -38,7 +38,7 @@ then
   echo "Found $BETA_NUM beta settings" 
 
   SUBMITTED_JOB_ID=$(qsub -q qexp -A OPEN-8-23 -N BTW_MOBI -J 1-$BETA_NUM \
-    -l select=2:ncpus=24:mpiprocs=24:ompthreads=1,walltime=01:00:00 \
+    -l select=2:ncpus=24:mpiprocs=24:ompthreads=1,walltime=00:05:00 \
     -v INPUT_GRAPH=$INPUT_GRAPH,ROOT_DIR=$ROOT_DIR $0)
 
   echo "PBS Job ID: $SUBMITTED_JOB_ID"
