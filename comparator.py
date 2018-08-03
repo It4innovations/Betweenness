@@ -25,7 +25,7 @@ def parse_args() -> Arguments:
     parser.add_argument("-d", type=str, help="input directory")
     parser.add_argument("-o", type=str, help="output directory")
     parser.add_argument("-t", type=bool, help="top or bottom values")
-    parser.add_argument("-p", type=str, help="top X percent of values returned")
+    parser.add_argument("-p", type=float, help="top X percent of values returned")
     parser.add_argument("-v", type=int, help="version, 1=top changes, 2=top values, 3=top differencies")
 
     args = parser.parse_args()
@@ -126,6 +126,7 @@ def process_top_changes(directory: str, outputdirectory: str, comparer: Comparer
         del files[0]
         for file in files:
             derived = os.path.join(root, file)
+            print('{} -> {}'.format(basefilePath, derived))
             df_derived = pd.read_csv(derived, ';')
             df = pd.merge(df_base, df_derived, on='line_id')
             result = get_top_changes(df, comparer)['line_id'].tolist()
@@ -161,7 +162,7 @@ def main():
     arguments = parse_args()
 
     Path(arguments.outputdirectory).mkdir(exist_ok=True)
-
+    print('Params: -d {} -o {} -p {} -t {}'.format(arguments.directory, arguments.outputdirectory, arguments.percentage, arguments.top))
     if arguments.version == 1:
         process_top_changes(arguments.directory, arguments.outputdirectory, Comparer(arguments.percentage, arguments.top))
     elif arguments.version == 2:
