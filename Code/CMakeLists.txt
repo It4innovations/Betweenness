@@ -37,5 +37,5 @@ target_compile_definitions(betweenness-float PUBLIC -DNUM_SINGLE)
 target_link_libraries(betweenness-float ${MPI_CXX_LIBRARIES} ${OpenMP_CXX_LIBRARIES})
 
 add_executable(betweenness-double-ext ${BTW_SOURCE})
-target_compile_definitions(betweenness-double-ext PUBLIC -DNUM_DOUBLE -DBTW_USE_EXT)
+target_compile_definitions(betweenness-double-ext PUBLIC -DNUM_DOUBLE -DBTW_USE_EXTENSION)
 target_link_libraries(betweenness-double-ext ${MPI_CXX_LIBRARIES} ${OpenMP_CXX_LIBRARIES})

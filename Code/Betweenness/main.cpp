@@ -184,7 +184,7 @@ void PrintParameters(int version, string file, int startVertex, int endVertex, i
 		std::cout << "DOUBLE" << std::endl;
 	#endif
 
-		std::cout << "Node and vertex importance: ";
+		std::cout << "Vertex importance: ";
 	#ifdef BTW_USE_EXTENSION
 		std::cout << "YES" << std::endl;
    	#else
