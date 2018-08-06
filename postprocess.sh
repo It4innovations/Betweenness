@@ -33,7 +33,7 @@ echo "Running normalization"
 python $ROOT_DIR/normalization_max.py -d ./
 
 echo "Running comparator"
-python $ROOT_DIR/comparator.py -d ./normalized -o ./compared -t 1 -p 10 -v 1
+python $ROOT_DIR/comparator.py -d ./normalized -o ./compared -p 0.07 -t 1 -v 3
 
 echo "Postprocessing finished."
 popd

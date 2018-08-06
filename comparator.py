@@ -162,7 +162,7 @@ def main():
     arguments = parse_args()
 
     Path(arguments.outputdirectory).mkdir(exist_ok=True)
-    print('Params: -d {} -o {} -p {} -t {}'.format(arguments.directory, arguments.outputdirectory, arguments.percentage, arguments.top))
+    print('Params: -d {} -o {} -p {} -t {} -v {}'.format(arguments.directory, arguments.outputdirectory, arguments.percentage, arguments.top, arguments.version))
     if arguments.version == 1:
         process_top_changes(arguments.directory, arguments.outputdirectory, Comparer(arguments.percentage, arguments.top))
     elif arguments.version == 2:
