@@ -178,10 +178,10 @@ BetweennessResult Betweenness::CalculateOpenMPSpecs(int startVertex, int endVert
 	{	
 		priority_queue<KeyValuePair, vector<KeyValuePair>, greater<KeyValuePair>> Q;
 		stack<int> S;
-		btw_num_t *dist = new btw_num_t[vertices];
-		list<int> *Pred = new list<int>[vertices];	//list of predecessors is faster
-		btw_num_t *sp = new btw_num_t[vertices];
-		bool *isInStack = new bool[vertices];
+		vector<btw_num_t> dist(vertices);
+		vector<list<int>> Pred(vertices);	//list of predecessors is faster
+		vector<btw_num_t> sp(vertices);
+		vector<bool> isInStack(vertices);
 		btw_num_t * alpha = graph->GetAlpha(); //extention about vertex importance
 		btw_num_t * beta = graph->GetBeta();		
 		
@@ -245,7 +245,7 @@ BetweennessResult Betweenness::CalculateOpenMPSpecs(int startVertex, int endVert
 		//Accumulation
 		{
 			btw_num_t c = 0;
-			btw_num_t *delta = new btw_num_t[vertices];
+			vector<btw_num_t> delta(vertices);
 			
 			for (int v = 0; v < vertices; v++)
 			{
@@ -274,12 +274,7 @@ BetweennessResult Betweenness::CalculateOpenMPSpecs(int startVertex, int endVert
 					betweenness[w] = betweenness[w] + delta[w];
 				}
 			}
-			delete[] delta;
 		}
-		delete[] Pred;
-		delete[] dist;
-		delete[] sp;
-		delete[] isInStack;
 	}
 
 
