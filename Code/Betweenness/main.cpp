@@ -127,14 +127,25 @@ int main(int argc, char* argv[])
 		cout << "Betweenness started " << endl;
 		result = bb->CalculateOpenMP(startVertex, endVertex, threads);
 	}
-	else
+	else if (version == 2)
 	{
 		if (rank == 0) cout << "Betweenness started " << endl;
 		result = bb->CalculateMpi(startVertex, endVertex, threads, chunkSize);
 	}
+	else if (version == 3) 
+	{
+		cout << "Betweenness started " << endl;
+		result = bb->CalculateOpenMPSpecs(startVertex, endVertex, threads);
+	}
+	else
+	{
+		cout << "Unrecognized version. Quitting." << endl;
+		exit(1);
+	}
 
 	if (version == 0 
 		|| version == 1 
+		|| version == 3
 		|| rank == 0)
 	{
 		auto end_time = chrono::high_resolution_clock::now();
@@ -171,7 +182,7 @@ void PrintParameters(int version, string file, int startVertex, int endVertex, i
 	cout << "-file: " << file << endl;
 	cout << "-startVertex: " << startVertex << endl;
 	cout << "-endVertex: " << endVertex << endl;
-	if(version == 1 || version == 2) cout << "-threads: " << threads << endl;
+	if(version == 1 || version == 2 || version == 3) cout << "-threads: " << threads << endl;
 	if(version == 2) cout << "-chunkSize: " << chunkSize << endl << "-processes: " << processes << endl;
 	cout << "-alphaFile: " << alphaFile << endl;
 	cout << "-betaFile: " << betaFile << endl;
