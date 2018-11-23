@@ -173,110 +173,115 @@ BetweennessResult Betweenness::CalculateOpenMPSpecs(int startVertex, int endVert
 		edgeBetweenness[i] = 0;
 	}
 
-	#pragma omp parallel for reduction(+ : betweenness[:vertices], edgeBetweenness[:edges]) num_threads(threads)
-	for (int s = startVertex; s < endVertex; s++)
-	{	
+	#pragma omp parallel reduction(+ : betweenness[:vertices], edgeBetweenness[:edges]) num_threads(threads)
+	{
 		priority_queue<KeyValuePair, vector<KeyValuePair>, greater<KeyValuePair>> Q;
 		stack<int> S;
 		vector<btw_num_t> dist(vertices);
 		vector<list<int>> Pred(vertices);	//list of predecessors is faster
 		vector<btw_num_t> sp(vertices);
 		vector<bool> isInStack(vertices);
-		btw_num_t * alpha = graph->GetAlpha(); //extention about vertex importance
-		btw_num_t * beta = graph->GetBeta();		
 		
-		//Single source shortest-paths problem
-		{
-			//Initialization
+		#pragma omp for
+		for (int s = startVertex; s < endVertex; s++)
+		{	
+
+
+			btw_num_t * alpha = graph->GetAlpha(); //extention about vertex importance
+			btw_num_t * beta = graph->GetBeta();		
+			
+			//Single source shortest-paths problem
 			{
-				for (int i = 0; i < vertices; i++)
+				//Initialization
 				{
-					Pred[i].clear();
-					dist[i] = std::numeric_limits<btw_num_t>::max();
-					sp[i] = 0;
-					isInStack[i] = false;
-				}
-				dist[s] = 0;
-				sp[s] = 1;
-				Q.push(KeyValuePair(dist[s], s));
-			}
-
-			while (!Q.empty())
-			{
-				KeyValuePair pair = Q.top();
-				int v = pair.Value;
-				Q.pop();
-
-				//this part of code should replace updating in priority queue which is expensive?
-				if (isInStack[v] == false)
-				{
-					isInStack[v] = true;
-					S.push(v);
-
-
-					vector<Edge> adjEdges = graph->GetAdjacentVertices(v);	//vector of edges is faster than list
-					for (auto &adjEdge : adjEdges)
+					for (int i = 0; i < vertices; i++)
 					{
-						btw_num_t edgeDistance = adjEdge.GetWeight();
+						Pred[i].clear();
+						dist[i] = std::numeric_limits<btw_num_t>::max();
+						sp[i] = 0;
+						isInStack[i] = false;
+					}
+					dist[s] = 0;
+					sp[s] = 1;
+					Q.push(KeyValuePair(dist[s], s));
+				}
 
-						int w = adjEdge.GetOutput();
+				while (!Q.empty())
+				{
+					KeyValuePair pair = Q.top();
+					int v = pair.Value;
+					Q.pop();
 
-						//path discovery, shorter path found?
-						if (dist[w] > dist[v] + edgeDistance)
+					//this part of code should replace updating in priority queue which is expensive?
+					if (isInStack[v] == false)
+					{
+						isInStack[v] = true;
+						S.push(v);
+
+
+						vector<Edge> adjEdges = graph->GetAdjacentVertices(v);	//vector of edges is faster than list
+						for (auto &adjEdge : adjEdges)
 						{
-							dist[w] = dist[v] + edgeDistance;
-							Q.push(KeyValuePair(dist[w], w));
-							sp[w] = 0;
-							Pred[w].clear();
-						}
+							btw_num_t edgeDistance = adjEdge.GetWeight();
 
-						//path counting, edge(v,w) on a shortest path?
-						if (Utils::AreEqual(dist[w], dist[v] + edgeDistance))
-						{
-							//sp[w] = sp[w] + edgeDistance*sp[v];
-							sp[w] = sp[w] + sp[v];
-							Pred[w].push_back(adjEdge.GetId());//if stores edge ids instead of predecessors vertices, so multiplicity will be possible
+							int w = adjEdge.GetOutput();
+
+							//path discovery, shorter path found?
+							if (dist[w] > dist[v] + edgeDistance)
+							{
+								dist[w] = dist[v] + edgeDistance;
+								Q.push(KeyValuePair(dist[w], w));
+								sp[w] = 0;
+								Pred[w].clear();
+							}
+
+							//path counting, edge(v,w) on a shortest path?
+							if (Utils::AreEqual(dist[w], dist[v] + edgeDistance))
+							{
+								//sp[w] = sp[w] + edgeDistance*sp[v];
+								sp[w] = sp[w] + sp[v];
+								Pred[w].push_back(adjEdge.GetId());//if stores edge ids instead of predecessors vertices, so multiplicity will be possible
+							}
 						}
 					}
 				}
 			}
-		}
 
-		//Accumulation
-		{
-			btw_num_t c = 0;
-			vector<btw_num_t> delta(vertices);
-			
-			for (int v = 0; v < vertices; v++)
+			//Accumulation
 			{
-				delta[v] = 0;
-			}
-
-			while (S.size() != 0)
-			{
-				int w = S.top();
-				S.pop();
-
-				for (auto edgeId : Pred[w])//go through edges on shortest paths, so we would know to which edge we should add edge betweenness value and to identify source vertex
+				btw_num_t c = 0;
+				vector<btw_num_t> delta(vertices);
+				
+				for (int v = 0; v < vertices; v++)
 				{
-					int v = graph->GetEdge(edgeId)->GetInput();//predecessor of w on shortest path from s
-					#ifdef BTW_USE_EXTENSION
-						c = (sp[v] / sp[w] * ((alpha[s] * beta[w]) + delta[w])); // Extension with vertex and edge importance
-					#else
-						c = (sp[v] / sp[w] * (1 + delta[w])); // No extension
-					#endif
-
-					edgeBetweenness[edgeId] = edgeBetweenness[edgeId] + c;	//save edge betweenness
-					delta[v] = delta[v] + c;
+					delta[v] = 0;
 				}
-				if (w != s)
+
+				while (S.size() != 0)
 				{
-					betweenness[w] = betweenness[w] + delta[w];
+					int w = S.top();
+					S.pop();
+
+					for (auto edgeId : Pred[w])//go through edges on shortest paths, so we would know to which edge we should add edge betweenness value and to identify source vertex
+					{
+						int v = graph->GetEdge(edgeId)->GetInput();//predecessor of w on shortest path from s
+						#ifdef BTW_USE_EXTENSION
+							c = (sp[v] / sp[w] * ((alpha[s] * beta[w]) + delta[w])); // Extension with vertex and edge importance
+						#else
+							c = (sp[v] / sp[w] * (1 + delta[w])); // No extension
+						#endif
+
+						edgeBetweenness[edgeId] = edgeBetweenness[edgeId] + c;	//save edge betweenness
+						delta[v] = delta[v] + c;
+					}
+					if (w != s)
+					{
+						betweenness[w] = betweenness[w] + delta[w];
+					}
 				}
 			}
 		}
 	}
-
 
 	return BetweennessResult(betweenness, edgeBetweenness);
 }
