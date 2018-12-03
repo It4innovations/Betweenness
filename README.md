@@ -46,7 +46,10 @@ There are two experiments available, both are automated by their respective bash
 ### Mobility
 The second experiment computes Betweenness centrality of Vienna road network graph representation. It is executed by the `run_mobility.sh` script. This script also accepts single parameter with the input graph. The script runs the extended version of the algorithm for each file in the Beta directory. Files in this directory contains values of the alpha and beta parameters of the extended algorithm described in the paper. Results for each run are available in the `Results` directory. To obtain postprocessed data for visualisation, use the `postprocess.sh` script which accepts job id of the mobility run as a parameter. Output of this script is stored in `Results/postprocessed_XXXXX`, where `XXXXX` is the job id of the run.
 
-# LICENSE
+## Acknowledgement
+This work was supported by The Ministry of Education, Youth and Sports from the National Programme of Sustainability (NPU II) project ‘IT4Innovations excellence in science - LQ1602’, by the IT4Innovations infrastructure which is supported from the Large Infrastructures for Research, Experimental Development and Innovations project ‘IT4Innovations National Supercomputing Center – LM2015070’, and by ANTAREX, a project supported by the EU H2020 FET-HPC program under grant agreement  No. 671623.
+
+## LICENSE
 This implementation of the Betweenness algorithm is licensed under the [New BSD License](LICENSE.md).
 
 This repository contains information from the Open Street Map, which is made available here under the **Open Database License (ODbL)**. Full text of the ODbL is available at [https://opendatacommons.org/licenses/odbl/1.0/](https://opendatacommons.org/licenses/odbl/1.0/) or [here](../LICENSE.ODBL.md).
