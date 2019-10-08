@@ -29,6 +29,7 @@ public:
 	BetweennessResult Calculate(int startVertex, int endVertex);
 	//OpenMP version of betweenness
 	BetweennessResult CalculateOpenMP(int startVertex, int endVertex, int threads);
+	BetweennessResult CalculateOpenMPSpecs(int startVertex, int endVertex, int threads);
 	//btw_num_t* CalculateOpenMP2(int startVertex, int endVertex, int threads);
 	BetweennessResult CalculateMpi(int startVertex, int endVertex, int threads, int chunkSize);
 	~Betweenness();
